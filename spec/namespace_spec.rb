@@ -12,29 +12,29 @@ describe Sinatra::Namespace do
     end
   end
 
-  def namespace(*args, &block)
-    mock_app { namespace(*args, &block) }
+  def _namespace(*args, &block)
+    mock_app { _namespace(*args, &block) }
   end
 
   verbs.each do |verb|
     describe "HTTP #{verb.to_s.upcase}" do
 
-      it 'prefixes the path with the namespace' do
-        namespace('/foo') { send(verb, '/bar') { 'baz' }}
+      it 'prefixes the path with the _namespace' do
+        _namespace('/foo') { send(verb, '/bar') { 'baz' }}
         send(verb, '/foo/bar').should be_ok
         body.should == 'baz' unless verb == :head
         send(verb, '/foo/baz').should_not be_ok
       end
 
-      context 'when namespace is a string' do
+      context 'when _namespace is a string' do
         it 'accepts routes with no path' do
-          namespace('/foo') { send(verb) { 'bar' } }
+          _namespace('/foo') { send(verb) { 'bar' } }
           send(verb, '/foo').should be_ok
           body.should == 'bar' unless verb == :head
         end
 
         it 'accepts the path as a named parameter' do
-          namespace('/foo') { send(verb, '/:bar') { params[:bar] }}
+          _namespace('/foo') { send(verb, '/:bar') { params[:bar] }}
           send(verb, '/foo/bar').should be_ok
           body.should == 'bar' unless verb == :head
           send(verb, '/foo/baz').should be_ok
@@ -42,22 +42,22 @@ describe Sinatra::Namespace do
         end
 
         it 'accepts the path as a regular expression' do
-          namespace('/foo') { send(verb, /\/\d\d/) { 'bar' }}
+          _namespace('/foo') { send(verb, /\/\d\d/) { 'bar' }}
           send(verb, '/foo/12').should be_ok
           body.should == 'bar' unless verb == :head
           send(verb, '/foo/123').should_not be_ok
         end
       end
 
-      context 'when namespace is a named parameter' do
+      context 'when _namespace is a named parameter' do
         it 'accepts routes with no path' do
-          namespace('/:foo') { send(verb) { 'bar' } }
+          _namespace('/:foo') { send(verb) { 'bar' } }
           send(verb, '/foo').should be_ok
           body.should == 'bar' unless verb == :head
         end
 
         it 'sets the parameter correctly' do
-          namespace('/:foo') { send(verb, '/bar') { params[:foo] }}
+          _namespace('/:foo') { send(verb, '/bar') { params[:foo] }}
           send(verb, '/foo/bar').should be_ok
           body.should == 'foo' unless verb == :head
           send(verb, '/fox/bar').should be_ok
@@ -66,7 +66,7 @@ describe Sinatra::Namespace do
         end
 
         it 'accepts the path as a named parameter' do
-          namespace('/:foo') { send(verb, '/:bar') { params[:bar] }}
+          _namespace('/:foo') { send(verb, '/:bar') { params[:bar] }}
           send(verb, '/foo/bar').should be_ok
           body.should == 'bar' unless verb == :head
           send(verb, '/foo/baz').should be_ok
@@ -74,7 +74,7 @@ describe Sinatra::Namespace do
         end
 
         it 'accepts the path as regular expression' do
-          namespace('/:foo') { send(verb, %r{/bar}) { params[:foo] }}
+          _namespace('/:foo') { send(verb, %r{/bar}) { params[:foo] }}
           send(verb, '/foo/bar').should be_ok
           body.should == 'foo' unless verb == :head
           send(verb, '/fox/bar').should be_ok
@@ -83,15 +83,15 @@ describe Sinatra::Namespace do
         end
       end
 
-      context 'when namespace is a regular expression' do
+      context 'when _namespace is a regular expression' do
         it 'accepts routes with no path' do
-          namespace(%r{/foo}) { send(verb) { 'bar' } }
+          _namespace(%r{/foo}) { send(verb) { 'bar' } }
           send(verb, '/foo').should be_ok
           body.should == 'bar' unless verb == :head
         end
 
         it 'accepts the path as a named parameter' do
-          namespace(%r{/foo}) { send(verb, '/:bar') { params[:bar] }}
+          _namespace(%r{/foo}) { send(verb, '/:bar') { params[:bar] }}
           send(verb, '/foo/bar').should be_ok
           body.should == 'bar' unless verb == :head
           send(verb, '/foo/baz').should be_ok
@@ -99,16 +99,16 @@ describe Sinatra::Namespace do
         end
 
         it 'accepts the path as a regular expression' do
-          namespace(/\/\d\d/) { send(verb, /\/\d\d/) { 'foo' }}
+          _namespace(/\/\d\d/) { send(verb, /\/\d\d/) { 'foo' }}
           send(verb, '/23/12').should be_ok
           body.should == 'foo' unless verb == :head
           send(verb, '/123/12').should_not be_ok
         end
       end
 
-      context 'when namespace is a splat' do
+      context 'when _namespace is a splat' do
         it 'accepts the path as a splat' do
-          namespace('/*') { send(verb, '/*') { params[:splat].join ' - ' }}
+          _namespace('/*') { send(verb, '/*') { params[:splat].join ' - ' }}
           send(verb, '/foo/bar').should be_ok
           body.should == 'foo - bar' unless verb == :head
         end
@@ -117,14 +117,14 @@ describe Sinatra::Namespace do
       describe 'before-filters' do
         specify 'are triggered' do
           ran = false
-          namespace('/foo') { before { ran = true }}
+          _namespace('/foo') { before { ran = true }}
           send(verb, '/foo')
           ran.should be_true
         end
 
-        specify 'are not triggered for a different namespace' do
+        specify 'are not triggered for a different _namespace' do
           ran = false
-          namespace('/foo') { before { ran = true }}
+          _namespace('/foo') { before { ran = true }}
           send(verb, '/fox')
           ran.should be_false
         end
@@ -133,24 +133,24 @@ describe Sinatra::Namespace do
       describe 'after-filters' do
         specify 'are triggered' do
           ran = false
-          namespace('/foo') { after { ran = true }}
+          _namespace('/foo') { after { ran = true }}
           send(verb, '/foo')
           ran.should be_true
         end
 
-        specify 'are not triggered for a different namespace' do
+        specify 'are not triggered for a different _namespace' do
           ran = false
-          namespace('/foo') { after { ran = true }}
+          _namespace('/foo') { after { ran = true }}
           send(verb, '/fox')
           ran.should be_false
         end
       end
 
       describe 'conditions' do
-        context 'when the namespace has no prefix' do
-          specify 'are accepted in the namespace' do
+        context 'when the _namespace has no prefix' do
+          specify 'are accepted in the _namespace' do
             mock_app do
-              namespace(:host_name => 'example.com') { send(verb) { 'yes' }}
+              _namespace(:host_name => 'example.com') { send(verb) { 'yes' }}
               send(verb, '/') { 'no' }
             end
             send(verb, '/', {}, 'HTTP_HOST' => 'example.com')
@@ -162,7 +162,7 @@ describe Sinatra::Namespace do
           end
 
           specify 'are accepted in the route definition' do
-            namespace :host_name => 'example.com' do
+            _namespace :host_name => 'example.com' do
               send(verb, '/foo', :provides => :txt) { 'ok' }
             end
             send(verb, '/foo', {}, 'HTTP_HOST' => 'example.com', 'HTTP_ACCEPT' => 'text/plain').should be_ok
@@ -172,7 +172,7 @@ describe Sinatra::Namespace do
 
           specify 'are accepted in the before-filter' do
             ran = false
-            namespace :provides => :txt do
+            _namespace :provides => :txt do
               before('/foo', :host_name => 'example.com') { ran = true }
               send(verb, '/*') { 'ok' }
             end
@@ -188,7 +188,7 @@ describe Sinatra::Namespace do
 
           specify 'are accepted in the after-filter' do
             ran = false
-            namespace :provides => :txt do
+            _namespace :provides => :txt do
               after('/foo', :host_name => 'example.com') { ran = true }
               send(verb, '/*') { 'ok' }
             end
@@ -203,9 +203,9 @@ describe Sinatra::Namespace do
           end
         end
 
-        context 'when the namespace is a string' do
-          specify 'are accepted in the namespace' do
-            namespace '/foo', :host_name => 'example.com' do
+        context 'when the _namespace is a string' do
+          specify 'are accepted in the _namespace' do
+            _namespace '/foo', :host_name => 'example.com' do
               send(verb) { 'ok' }
             end
             send(verb, '/foo', {}, 'HTTP_HOST' => 'example.com').should be_ok
@@ -213,7 +213,7 @@ describe Sinatra::Namespace do
           end
 
           specify 'are accepted in the before-filter' do
-            namespace '/foo' do
+            _namespace '/foo' do
               before(:host_name => 'example.com') { @yes = 'yes' }
               send(verb) { @yes || 'no' }
             end
@@ -227,7 +227,7 @@ describe Sinatra::Namespace do
 
           specify 'are accepted in the after-filter' do
             ran = false
-            namespace '/foo' do
+            _namespace '/foo' do
               before(:host_name => 'example.com') { ran = true }
               send(verb) { 'ok' }
             end
@@ -238,17 +238,17 @@ describe Sinatra::Namespace do
           end
 
           specify 'are accepted in the route definition' do
-            namespace '/foo' do
+            _namespace '/foo' do
               send(verb, :host_name => 'example.com') { 'ok' }
             end
             send(verb, '/foo', {}, 'HTTP_HOST' => 'example.com').should be_ok
             send(verb, '/foo', {}, 'HTTP_HOST' => 'example.org').should_not be_ok
           end
 
-          context 'when the namespace has a condition' do
+          context 'when the _namespace has a condition' do
             specify 'are accepted in the before-filter' do
               ran = false
-              namespace '/', :provides => :txt do
+              _namespace '/', :provides => :txt do
                 before(:host_name => 'example.com') { ran = true }
                 send(verb) { 'ok' }
               end
@@ -262,7 +262,7 @@ describe Sinatra::Namespace do
 
             specify 'are accepted in the filters' do
               ran = false
-              namespace '/f', :provides => :txt do
+              _namespace '/f', :provides => :txt do
                 before('oo', :host_name => 'example.com') { ran = true }
                 send(verb, '/*') { 'ok' }
               end
@@ -281,7 +281,7 @@ describe Sinatra::Namespace do
 
       describe 'helpers' do
         it 'are defined using the helpers method' do
-          namespace '/foo' do
+          _namespace '/foo' do
             helpers do
               def magic
                 42
@@ -298,7 +298,7 @@ describe Sinatra::Namespace do
         end
 
         it 'can be defined as normal methods' do
-          namespace '/foo' do
+          _namespace '/foo' do
             def magic
               42
             end
@@ -319,7 +319,7 @@ describe Sinatra::Namespace do
             end
           end
 
-          namespace '/foo' do
+          _namespace '/foo' do
             helpers mixin
             send verb, '/bar' do
               magic.to_s
@@ -330,9 +330,9 @@ describe Sinatra::Namespace do
           body.should == '42' unless verb == :head
         end
 
-        specify 'are unavailable outside the namespace where they are defined' do
+        specify 'are unavailable outside the _namespace where they are defined' do
           mock_app do
-            namespace '/foo' do
+            _namespace '/foo' do
               def magic
                 42
               end
@@ -350,7 +350,7 @@ describe Sinatra::Namespace do
           proc { send verb, '/' }.should raise_error(NameError)
         end
 
-        specify 'are unavailable outside the namespace that they are mixed into' do
+        specify 'are unavailable outside the _namespace that they are mixed into' do
           mixin = Module.new do
             def magic
               42
@@ -358,7 +358,7 @@ describe Sinatra::Namespace do
           end
 
           mock_app do
-            namespace '/foo' do
+            _namespace '/foo' do
               helpers mixin
               send verb, '/bar' do
                 magic.to_s
@@ -373,7 +373,7 @@ describe Sinatra::Namespace do
           proc { send verb, '/' }.should raise_error(NameError)
         end
 
-        specify 'are available to nested namespaces' do
+        specify 'are available to nested _namespaces' do
           mock_app do
             helpers do
               def magic
@@ -381,7 +381,7 @@ describe Sinatra::Namespace do
               end
             end
 
-            namespace '/foo' do
+            _namespace '/foo' do
               send verb, '/bar' do
                 magic.to_s
               end
@@ -400,7 +400,7 @@ describe Sinatra::Namespace do
               end
             end
 
-            namespace '/foo' do
+            _namespace '/foo' do
               def magic
                 super - 19
               end
@@ -417,9 +417,9 @@ describe Sinatra::Namespace do
       end
 
       describe 'nesting' do
-        it 'routes to nested namespaces' do
-          namespace '/foo' do
-            namespace '/bar' do
+        it 'routes to nested _namespaces' do
+          _namespace '/foo' do
+            _namespace '/bar' do
               send(verb, '/baz') { 'OKAY!!11!'}
             end
           end
@@ -428,15 +428,15 @@ describe Sinatra::Namespace do
           body.should == 'OKAY!!11!' unless verb == :head
         end
 
-        it 'exposes helpers to nested namespaces' do
-          namespace '/foo' do
+        it 'exposes helpers to nested _namespaces' do
+          _namespace '/foo' do
             helpers do
               def magic
                 42
               end
             end
 
-            namespace '/bar' do
+            _namespace '/bar' do
               send verb, '/baz' do
                 magic.to_s
               end
@@ -448,8 +448,8 @@ describe Sinatra::Namespace do
         end
 
         specify 'does not provide access to nested helper methods' do
-          namespace '/foo' do
-            namespace '/bar' do
+          _namespace '/foo' do
+            _namespace '/bar' do
               def magic
                 42
               end
@@ -467,8 +467,8 @@ describe Sinatra::Namespace do
           proc { send verb, '/foo' }.should raise_error(NameError)
         end
 
-        it 'accepts a nested namespace as a named parameter' do
-          namespace('/:a') { namespace('/:b') { send(verb) { params[:a] }}}
+        it 'accepts a nested _namespace as a named parameter' do
+          _namespace('/:a') { _namespace('/:b') { send(verb) { params[:a] }}}
           send(verb, '/foo/bar').should be_ok
           body.should ==  'foo' unless verb == :head
         end
@@ -476,7 +476,7 @@ describe Sinatra::Namespace do
 
       describe 'error handling' do
         it 'can be customized using the not_found block' do
-          namespace('/de') do
+          _namespace('/de') do
             not_found { 'nicht gefunden' }
           end
           send(verb, '/foo').status.should == 404
@@ -488,7 +488,7 @@ describe Sinatra::Namespace do
         end
 
         it 'can be customized for specific error codes' do
-          namespace('/de') do
+          _namespace('/de') do
             error(404) { 'nicht gefunden' }
           end
           send(verb, '/foo').status.should == 404
@@ -502,9 +502,9 @@ describe Sinatra::Namespace do
         it 'falls back to the handler defined in the base app' do
           mock_app do
             error(404) { 'not found...' }
-            namespace('/en') do
+            _namespace('/en') do
             end
-            namespace('/de') do
+            _namespace('/de') do
               error(404) { 'nicht gefunden' }
             end
           end
@@ -526,13 +526,13 @@ describe Sinatra::Namespace do
               401
             end
 
-            namespace('/en') do
+            _namespace('/en') do
               get '/foo' do
                 raise BError
               end
             end
 
-            namespace('/de') do
+            _namespace('/de') do
               error(AError) do
                 body('methode nicht erlaubt')
                 406
@@ -556,7 +556,7 @@ describe Sinatra::Namespace do
             mock_app do
               template(:foo) { 'hi' }
               send(verb, '/') { erb :foo }
-              namespace '/foo' do
+              _namespace '/foo' do
                 send(verb) { erb :foo }
               end
             end
@@ -569,7 +569,7 @@ describe Sinatra::Namespace do
             mock_app do
               template(:foo) { 'hi' }
               send(verb, '/') { erb :foo }
-              namespace '/foo' do
+              _namespace '/foo' do
                 template(:foo) { 'ho' }
                 send(verb) { erb :foo }
               end
@@ -581,10 +581,10 @@ describe Sinatra::Namespace do
 
           specify 'can use a custom views directory' do
             mock_app do
-              set :views, File.expand_path('../namespace', __FILE__)
+              set :views, File.expand_path('../_namespace', __FILE__)
               send(verb, '/') { erb :foo }
-              namespace('/foo') do
-                set :views, File.expand_path('../namespace/nested', __FILE__)
+              _namespace('/foo') do
+                set :views, File.expand_path('../_namespace/nested', __FILE__)
                 send(verb) { erb :foo }
               end
             end
@@ -598,7 +598,7 @@ describe Sinatra::Namespace do
               layout { 'he said: <%= yield %>' }
               template(:foo) { 'hi' }
               send(verb, '/') { erb :foo }
-              namespace '/foo' do
+              _namespace '/foo' do
                 template(:foo) { 'ho' }
                 send(verb) { erb :foo }
               end
@@ -613,7 +613,7 @@ describe Sinatra::Namespace do
               layout { 'Hello <%= yield %>!' }
               template(:foo) { 'World' }
               send(verb, '/') { erb :foo }
-              namespace '/foo' do
+              _namespace '/foo' do
                 layout { 'Hi <%= yield %>!' }
                 send(verb) { erb :foo }
               end
@@ -630,18 +630,18 @@ describe Sinatra::Namespace do
           value = nil
           mock_app do
             set :foo, 42
-            namespace '/foo' do
+            _namespace '/foo' do
               value = foo
             end
           end
           value.should == 42
         end
 
-        specify 'can be registered within a namespace' do
+        specify 'can be registered within a _namespace' do
           a = b = nil
           extension = Module.new { define_method(:views) { 'CUSTOM!!!' } }
           mock_app do
-            namespace '/' do
+            _namespace '/' do
               register extension
               a = views
             end
@@ -658,7 +658,7 @@ describe Sinatra::Namespace do
             define_method(:route_added) { |*r| route = r }
           end
           mock_app do
-            namespace '/f' do
+            _namespace '/f' do
               register extension
               get('oo') { }
             end
@@ -668,7 +668,7 @@ describe Sinatra::Namespace do
         end
 
         specify 'prevent app-global settings from being changed' do
-          proc { namespace('/') { set :foo, :bar }}.should raise_error
+          proc { _namespace('/') { set :foo, :bar }}.should raise_error
         end
       end
     end

@@ -299,10 +299,10 @@ describe Sinatra::RespondWith do
       req('/b', :json).should be_ok
     end
 
-    it 'plays well with namespaces' do
+    it 'plays well with _namespaces' do
       respond_app do
         register Sinatra::Namespace
-        namespace '/a' do
+        _namespace '/a' do
           respond_to :json
           get { 'json' }
         end

@@ -138,7 +138,7 @@ module Sinatra
     end
 
     module SharedMethods
-      def namespace(pattern, conditions = {}, &block)
+      def _namespace(pattern, conditions = {}, &block)
         Sinatra::Namespace.new(self, pattern, conditions, &block)
       end
     end
@@ -280,5 +280,5 @@ module Sinatra
   end
 
   register Sinatra::Namespace
-  Delegator.delegate :namespace
+  Delegator.delegate :_namespace
 end
