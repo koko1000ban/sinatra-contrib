@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# encoding: utf-8
 
 # Run `rake sinatra-contrib.gemspec` to update the gemspec.
 require File.expand_path('../lib/sinatra/contrib/version', __FILE__)
@@ -166,8 +166,8 @@ Gem::Specification.new do |s|
     "spec/json_spec.rb",
     "spec/link_header_spec.rb",
     "spec/multi_route_spec.rb",
-    "spec/namespace/foo.erb",
-    "spec/namespace/nested/foo.erb",
+    "spec/_namespace/foo.erb",
+    "spec/_namespace/nested/foo.erb",
     "spec/namespace_spec.rb",
     "spec/okjson.rb",
     "spec/reloader/app.rb.erb",
